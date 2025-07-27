@@ -12,7 +12,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products = Product::with('variants')->latest()->paginate(12);
+        $products = Product::with(['variants', 'collections'])->latest()->paginate(12);
         return response()->json($products);
     }
 
@@ -29,7 +29,9 @@ class ProductController extends Controller
             'variants' => 'required|array',
             'variants.*.color' => 'required|string',
             'variants.*.size' => 'required|string',
-            'variants.*.stock' => 'required|integer'
+            'variants.*.stock' => 'required|integer',
+            'collection_ids' => 'nullable|array',
+            'collection_ids.*' => 'exists:collections,id',
         ]);
 
         if ($request->hasFile('image')) {
@@ -42,12 +44,16 @@ class ProductController extends Controller
             $product->variants()->create($variant);
         }
 
-        return response()->json($product->load('variants'), 201);
+        if ($request->has('collection_ids')) {
+            $product->collections()->attach($request->collection_ids);
+        }
+
+        return response()->json($product->load(['variants', 'collections']), 201);
     }
 
     public function show(Request $request, $id)
     {
-        $product = Product::with('variants')->findOrFail($id);
+        $product = Product::with(['variants', 'collections'])->findOrFail($id);
 
         $query = $product->variants();
 
@@ -71,7 +77,7 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        $product = Product::with('variants')->findOrFail($id);
+        $product = Product::with(['variants', 'collections'])->findOrFail($id);
 
         $data = $request->validate([
             'name' => 'sometimes|string',
@@ -84,10 +90,11 @@ class ProductController extends Controller
             'variants' => 'nullable|array',
             'variants.*.color' => 'required_with:variants|string',
             'variants.*.size' => 'required_with:variants|string',
-            'variants.*.stock' => 'required_with:variants|integer'
+            'variants.*.stock' => 'required_with:variants|integer',
+            'collection_ids' => 'nullable|array',
+            'collection_ids.*' => 'exists:collections,id',
         ]);
 
-        // Handle image replacement
         if ($request->hasFile('image')) {
             if ($product->image) {
                 Storage::disk('public')->delete($product->image);
@@ -97,17 +104,19 @@ class ProductController extends Controller
 
         $product->update($data);
 
-        // 🔁 Replace all variants (for simplicity)
         if (isset($data['variants'])) {
-            $product->variants()->delete(); // remove old
+            $product->variants()->delete();
             foreach ($data['variants'] as $variant) {
-                $product->variants()->create($variant); // add new
+                $product->variants()->create($variant);
             }
         }
 
-        return response()->json($product->load('variants'));
-    }
+        if ($request->has('collection_ids')) {
+            $product->collections()->sync($request->collection_ids);
+        }
 
+        return response()->json($product->load(['variants', 'collections']));
+    }
 
     public function destroy($id)
     {
@@ -118,6 +127,7 @@ class ProductController extends Controller
         }
 
         $product->variants()->delete();
+        $product->collections()->detach();
         $product->delete();
 
         return response()->json(['message' => 'Product and variants deleted']);

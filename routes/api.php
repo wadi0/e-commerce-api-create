@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\CollectionController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\WishlistController;
 use App\Http\Controllers\AuthController;
@@ -35,5 +36,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store']);
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy']);
+    //
+    Route::get('/collections', [CollectionController::class, 'index']);
+    Route::get('/collections/{slug}', [CollectionController::class, 'show']);
+    Route::post('/collections', [CollectionController::class, 'store']);
+    Route::put('/collections/{id}', [CollectionController::class, 'update']);
+    Route::delete('/collections/{id}', [CollectionController::class, 'destroy']);
+
 });
 
