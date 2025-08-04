@@ -60,6 +60,41 @@ class CartController extends Controller
         ]);
     }
 
+    // Cart quantity update method - এই method add করুন
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $cartItem = Cart::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$cartItem) {
+            return response()->json(['message' => 'Cart item not found'], 404);
+        }
+
+        // Check stock availability
+        $product = Product::with('variants')->findOrFail($cartItem->product_id);
+        $totalStock = $product->variants->sum('stock');
+
+        if ($request->quantity > $totalStock) {
+            return response()->json([
+                'message' => 'Stock limited. Only ' . $totalStock . ' items available.',
+                'available' => $totalStock,
+            ], 422);
+        }
+
+        $cartItem->quantity = $request->quantity;
+        $cartItem->save();
+
+        return response()->json([
+            'message' => 'Cart updated successfully',
+            'cart' => $cartItem->load('product'),
+        ]);
+    }
+
     public function destroy($id)
     {
         $deleted = Cart::where('id', $id)

@@ -12,7 +12,29 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products = Product::with(['variants', 'collections'])->latest()->paginate(12);
+        // Build query with relationships
+        $query = Product::with(['variants', 'collections']);
+
+        // Apply category filter if provided
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Apply search filter if provided
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Get per_page parameter (default 12, max 100)
+        $perPage = min($request->get('per_page', 12), 100);
+
+        // Order by latest and paginate
+        $products = $query->latest()->paginate($perPage);
+
         return response()->json($products);
     }
 
