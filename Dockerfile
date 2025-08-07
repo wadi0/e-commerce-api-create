@@ -9,24 +9,25 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Set working directory
-WORKDIR /var/www/html
+# Change Apache DocumentRoot to /var/www/html/public
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
 
-# Copy Laravel project files
+# Copy Laravel project to /var/www/html
 COPY . /var/www/html
 
-# Set Apache DocumentRoot to /var/www/html/public
-RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
-
-# Fix permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+# Set working directory
+WORKDIR /var/www/html
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install PHP dependencies
+# Install PHP dependencies without dev
 RUN composer install --no-dev --optimize-autoloader
 
-# Expose port
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Expose port 80
 EXPOSE 80
