@@ -9,7 +9,7 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_KEY
-        value: base64:8K+4tAhl4uaTBRhPxKJ1/idJHDKSE4Spl17YOVgI3xE=   # তোমার local APP_KEY এর সাথে মিল থাকবে
+        value: base64:YhRhjhMsRDXTryzY11xGKQMG1u5+QPdMF93GthIGsWI=
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
