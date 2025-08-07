@@ -6,22 +6,26 @@ services:
     region: singapore
     dockerfilePath: Dockerfile
     envVars:
+      - key: APP_NAME
+        value: "My Laravel App"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: "false"
       - key: APP_KEY
         value: base64:YhRhjhMsRDXTryzY11xGKQMG1u5+QPdMF93GthIGsWI=
+      - key: APP_URL
+        value: https://your-render-service-name.onrender.com
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
         value: /var/www/html/database/database.sqlite
       - key: LOG_CHANNEL
         value: stderr
-      - key: APP_URL
-        value: https://your-render-url.onrender.com
       - key: SESSION_DRIVER
         value: cookie
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
       - key: CACHE_DRIVER
         value: file
       - key: QUEUE_CONNECTION
