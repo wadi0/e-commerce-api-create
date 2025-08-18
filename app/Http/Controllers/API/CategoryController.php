@@ -8,30 +8,48 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    // Show all categories
+    // Show all categories (paginated)
     public function index()
     {
-        return Category::all();
+        $categories = Category::paginate(10);
+        return response()->json([
+            'success' => true,
+            'message' => 'Category list fetched successfully',
+            'data' => $categories
+        ]);
     }
 
     // Show one category
     public function show($id)
     {
-        return Category::findOrFail($id);
+        $category = Category::findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category fetched successfully',
+            'data' => $category
+        ]);
     }
 
     // Store new category
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'category_name' => 'required|string|max:255',
+        ], [
+            'category_name.required' => 'Category name is required',
+            'category_name.max' => 'Category name must not exceed 255 characters'
         ]);
 
         $category = Category::create([
-            'name' => $request->name,
+            'category_name' => $request->category_name,
         ]);
 
-        return response()->json($category, 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Category created successfully',
+            'data' => $category
+        ], 201);
     }
 
     // Update category
@@ -40,14 +58,18 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'category_name' => 'required|string|max:255',
         ]);
 
         $category->update([
-            'name' => $request->name,
+            'category_name' => $request->category_name,
         ]);
 
-        return response()->json($category);
+        return response()->json([
+            'success' => true,
+            'message' => 'Category updated successfully',
+            'data' => $category
+        ]);
     }
 
     // Delete category
@@ -56,6 +78,9 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $category->delete();
 
-        return response()->json(['message' => 'Category deleted']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Category deleted successfully'
+        ]);
     }
 }
