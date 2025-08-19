@@ -3,22 +3,21 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Cloudinary\Cloudinary;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
+    public function boot()
     {
-        //
-    }
+        // Cloudinary manual configuration
+        $cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key' => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ],
+        ]);
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
+        $this->app->instance(Cloudinary::class, $cloudinary);
     }
 }

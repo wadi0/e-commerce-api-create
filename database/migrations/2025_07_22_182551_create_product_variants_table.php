@@ -5,19 +5,29 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-public function up(): void {
-Schema::create('product_variants', function (Blueprint $table) {
-$table->id();
-$table->unsignedBigInteger('product_id');
-$table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-$table->string('color');
-$table->string('size');
-$table->integer('stock')->default(0);
-$table->timestamps();
-});
-}
+    public function up(): void {
+        Schema::create('product_variants', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('product_id');
 
-public function down(): void {
-Schema::dropIfExists('product_variants');
-}
+            // Add foreign key with cascade on delete
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->onDelete('cascade');
+
+            $table->string('color');
+            $table->string('size');
+            $table->integer('stock')->default(0);
+
+            $table->timestamps();
+
+            // Optional: index for faster lookups
+            $table->index(['product_id', 'color', 'size']);
+        });
+    }
+
+    public function down(): void {
+        Schema::dropIfExists('product_variants');
+    }
 };

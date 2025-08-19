@@ -1,4 +1,5 @@
 <?php
+// File: app/Http/Controllers/API/CollectionController.php
 
 namespace App\Http\Controllers\API;
 
