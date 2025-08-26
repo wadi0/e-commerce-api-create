@@ -43,8 +43,8 @@ php /var/www/html/artisan route:cache --no-interaction
 php /var/www/html/artisan view:cache --no-interaction
 
 # Optional: Run migrations (uncomment if needed)
-# echo "Running database migrations..."
-# php /var/www/html/artisan migrate --force --no-interaction
+ echo "Running database migrations..."
+ php /var/www/html/artisan migrate --force --no-interaction
 
 # Fix final permissions
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
