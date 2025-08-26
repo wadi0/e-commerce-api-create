@@ -1,39 +1,28 @@
-# Use official PHP image with Apache
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
-# Install system dependencies
+# System dependencies
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl \
-    libpq-dev \
+    libpq-dev libpng-dev libonig-dev libxml2-dev zip unzip git curl \
     && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
 
-# Enable Apache mod_rewrite (needed for Laravel pretty URLs)
-RUN a2enmod rewrite
-
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy composer from official image
+# Composer install
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-# Copy existing project files
+WORKDIR /var/www
+
+# Copy app files
 COPY . .
 
-# Install Laravel dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions for Laravel storage & bootstrap
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Clear caches (fix artisan issues)
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
+RUN php artisan route:clear || true
+RUN php artisan view:clear || true
 
-# Expose port
-EXPOSE 80
+# Generate app key if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env; fi && php artisan key:generate --force || true
 
-# Start Apache
-CMD ["apache2-foreground"]
+CMD ["php-fpm"]
