@@ -1,28 +1,44 @@
-FROM php:8.2-fpm
+# Step 1: PHP with Apache
+FROM php:8.2-apache
 
-# System dependencies
+# Step 2: System dependencies
 RUN apt-get update && apt-get install -y \
-    libpq-dev libpng-dev libonig-dev libxml2-dev zip unzip git curl \
+    libpng-dev libonig-dev libxml2-dev zip unzip git curl libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
 
-# Composer install
+# Step 3: Enable Apache rewrite
+RUN a2enmod rewrite
+
+# Step 4: Set working directory
+WORKDIR /var/www/html
+
+# Step 5: Copy composer from official image
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
-
-# Copy app files
+# Step 6: Copy project files
 COPY . .
 
-# Install PHP dependencies
+# Step 7: Copy .env if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+# Step 8: Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Clear caches (fix artisan issues)
+# Step 9: Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Step 10: Clear caches
 RUN php artisan config:clear || true
 RUN php artisan cache:clear || true
 RUN php artisan route:clear || true
 RUN php artisan view:clear || true
 
-# Generate app key if not exists
-RUN if [ ! -f .env ]; then cp .env.example .env; fi && php artisan key:generate --force || true
+# Step 11: Generate key
+RUN php artisan key:generate --force
 
-CMD ["php-fpm"]
+# Step 12: Expose port
+EXPOSE 80
+
+# Step 13: Start Apache
+CMD ["apache2-foreground"]
