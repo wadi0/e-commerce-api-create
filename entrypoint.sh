@@ -6,11 +6,9 @@ if [ ! -f /var/www/html/.env ]; then
 fi
 
 # Generate APP_KEY if missing
-if ! grep -q APP_KEY /var/www/html/.env || grep -q "base64:{$}" /var/www/html/.env; then
-    php /var/www/html/artisan key:generate --force
-fi
+php /var/www/html/artisan key:generate --force
 
-# Run migrations (optional, can comment if not needed)
+# Optional: run migrations
 # php /var/www/html/artisan migrate --force
 
 # Start Apache in foreground

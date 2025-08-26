@@ -22,7 +22,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Install composer dependencies without scripts first
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader --no-scripts
 
 # Run package discover manually after .env is present
 RUN php artisan package:discover --ansi || true
