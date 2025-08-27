@@ -6,7 +6,8 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173'], // আপনার React Vite এর ঠিকানা
+    'allowed_origins' => ['https://zaw-collection-laravel-api-admin-fr.vercel.app'],
+//        ['http://localhost:5173'], // আপনার React Vite এর ঠিকানা
 
     'allowed_origins_patterns' => [],
 
