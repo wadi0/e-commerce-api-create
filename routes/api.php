@@ -6,6 +6,7 @@ use App\Http\Controllers\API\CollectionController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\WishlistController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,10 +46,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/wishlist', [WishlistController::class, 'store']);
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy']);
 
-    //
+    //collection api
     Route::post('/collections', [CollectionController::class, 'store']);
     Route::put('/collections/{id}', [CollectionController::class, 'update']);
     Route::delete('/collections/{id}', [CollectionController::class, 'destroy']);
+
+    //ssl ecommerze payment
+    Route::post('/payment/init', [PaymentController::class, 'initPayment']);
+    Route::post('/payment/success', [PaymentController::class, 'success']);
+    Route::post('/payment/fail', [PaymentController::class, 'fail']);
+    Route::post('/payment/cancel', [PaymentController::class, 'cancel']);
+
 
 });
 
