@@ -19,6 +19,12 @@ Route::get('categories/{id}', [CategoryController::class, 'show']);
 Route::get('/collections', [CollectionController::class, 'index']);
 Route::get('/collections/{slug}', [CollectionController::class, 'show']);
 
+// ✅ Payment routes (PUBLIC - SSLCommerz callbacks need no auth)
+Route::post('/payment/init', [PaymentController::class, 'initPayment']);
+Route::post('/payment/success', [PaymentController::class, 'success']);
+Route::post('/payment/fail', [PaymentController::class, 'fail']);
+Route::post('/payment/cancel', [PaymentController::class, 'cancel']);
+Route::post('/payment/ipn', [PaymentController::class, 'ipn']); // ✅ Added IPN route
 
 // Private route (requires token)
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -50,13 +56,4 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/collections', [CollectionController::class, 'store']);
     Route::put('/collections/{id}', [CollectionController::class, 'update']);
     Route::delete('/collections/{id}', [CollectionController::class, 'destroy']);
-
-    //ssl ecommerze payment
-    Route::post('/payment/init', [PaymentController::class, 'initPayment']);
-    Route::post('/payment/success', [PaymentController::class, 'success']);
-    Route::post('/payment/fail', [PaymentController::class, 'fail']);
-    Route::post('/payment/cancel', [PaymentController::class, 'cancel']);
-
-
 });
-
