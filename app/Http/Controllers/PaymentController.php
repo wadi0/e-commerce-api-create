@@ -46,9 +46,9 @@ class PaymentController extends Controller
             'total_amount' => $amount,
             'currency' => 'BDT',
             'tran_id' => $tranId,
-            'success_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/payment/success',
-            'fail_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/payment/fail',
-            'cancel_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/payment/cancel',
+            'success_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/api/payment/success',
+            'fail_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/api/payment/fail',
+            'cancel_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/api/payment/cancel',
             'ipn_url' => url('/api/payment/ipn'),
 
             // Customer Info
