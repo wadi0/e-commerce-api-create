@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,3 +14,7 @@ Route::get('/cloudinary-check', function () {
         'package_loaded' => class_exists('CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary')
     ]);
 });
+
+
+Route::post('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
+

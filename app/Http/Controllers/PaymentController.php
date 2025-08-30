@@ -39,16 +39,16 @@ class PaymentController extends Controller
         // ✅ Generate transaction ID
         $tranId = 'TXN_' . time() . '_' . rand(100000, 999999);
 
-        // ✅ Build payload
+        // ✅ Build payload - Fixed URLs
         $post_data = [
             'store_id' => env('SSLCZ_STORE_ID'),
             'store_passwd' => env('SSLCZ_STORE_PASS'),
             'total_amount' => $amount,
             'currency' => 'BDT',
             'tran_id' => $tranId,
-            'success_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/api/payment/success',
-            'fail_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/api/payment/fail',
-            'cancel_url' => 'https://zaw-collection-laravel-api-admin-fr.vercel.app/api/payment/cancel',
+            'success_url' => url('/api/payment/success'), // Fixed
+            'fail_url' => url('/api/payment/fail'),       // Fixed
+            'cancel_url' => url('/api/payment/cancel'),   // Fixed
             'ipn_url' => url('/api/payment/ipn'),
 
             // Customer Info
@@ -168,24 +168,40 @@ class PaymentController extends Controller
     public function success(Request $request)
     {
         Log::info('Payment Success:', $request->all());
-        return response()->json(['status' => 'Payment Success', 'data' => $request->all()]);
+
+        // React app এ redirect
+        return redirect('http://localhost:5173/cart?status=success&' . http_build_query($request->all()));
     }
 
     public function fail(Request $request)
     {
         Log::info('Payment Failed:', $request->all());
-        return response()->json(['status' => 'Payment Failed', 'data' => $request->all()]);
+
+        // React app এ redirect
+        return redirect('http://localhost:5173/cart?status=failed&' . http_build_query($request->all()));
     }
 
     public function cancel(Request $request)
     {
         Log::info('Payment Cancelled:', $request->all());
-        return response()->json(['status' => 'Payment Cancelled', 'data' => $request->all()]);
+
+        // React app এ redirect - Fixed
+        return redirect('http://localhost:5173/cart?status=cancelled&' . http_build_query($request->all()));
     }
 
     public function ipn(Request $request)
     {
         Log::info('Payment IPN:', $request->all());
+
+        // IPN validation logic here
+        $status = $request->input('status');
+        $tran_id = $request->input('tran_id');
+
+        if ($status === 'VALID') {
+            // Update order status in database
+            Log::info('IPN Valid for transaction: ' . $tran_id);
+        }
+
         return response('OK', 200);
     }
 }
