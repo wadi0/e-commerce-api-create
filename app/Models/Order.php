@@ -1,5 +1,4 @@
 <?php
-// File: app/Models/Order.php
 
 namespace App\Models;
 
@@ -13,6 +12,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'order_number',
+        'transaction_id', // ✅ এটা add করুন
         'status',
         'subtotal',
         'shipping_fee',

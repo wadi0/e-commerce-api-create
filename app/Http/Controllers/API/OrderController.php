@@ -44,7 +44,6 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
-            // Get selected cart items
             $cartItems = Cart::whereIn('id', $data['cart_ids'])
                 ->where('user_id', $user->id)
                 ->with('product')
@@ -60,14 +59,15 @@ class OrderController extends Controller
                 $subtotal += $item->product->price * $item->quantity;
             }
 
-            $shipping = $subtotal > 50 ? 0 : 10; // Free shipping over $50
-            $tax = $subtotal * 0.08; // 8% tax
+            $shipping = $subtotal > 50 ? 0 : 10;
+            $tax = $subtotal * 0.08;
             $total = $subtotal + $shipping + $tax;
 
             // Create order
             $order = Order::create([
                 'user_id' => $user->id,
                 'order_number' => 'ORD-' . time() . '-' . $user->id,
+                'transaction_id' => 'TXN_' . time() . '_' . rand(100000, 999999),
                 'status' => 'pending',
                 'subtotal' => $subtotal,
                 'shipping_fee' => $shipping,
@@ -98,23 +98,19 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Load order with items and products
             $order->load(['orderItems.product']);
-
-            Log::info('Order created successfully', ['order_id' => $order->id]);
 
             return response()->json([
                 'message' => 'Order placed successfully',
                 'order' => $order
             ], 201);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating order: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to create order', 'message' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to create order'], 500);
         }
     }
 
@@ -151,6 +147,54 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             Log::error('Error updating order status: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to update order status'], 500);
+        }
+    }
+
+    // Add these methods to your OrderController
+
+    public function getAllOrders(Request $request)
+    {
+        try {
+            $query = Order::with(['user', 'orderItems.product']);
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('order_number', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', "%{$search}%");
+                        });
+                });
+            }
+
+            // Filter by status
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            // Filter by payment status  
+            if ($request->filled('payment_status')) {
+                $query->where('payment_status', $request->payment_status);
+            }
+
+            $perPage = $request->get('per_page', 10);
+            $orders = $query->latest()->paginate($perPage);
+
+            return response()->json($orders);
+        } catch (\Exception $e) {
+            Log::error('Error fetching all orders: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch orders'], 500);
+        }
+    }
+
+    public function getOrderDetails($id)
+    {
+        try {
+            $order = Order::with(['user', 'orderItems.product'])->findOrFail($id);
+            return response()->json($order);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Order not found'], 404);
         }
     }
 }

@@ -5,7 +5,7 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\CollectionController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\WishlistController;
-use App\Http\Controllers\API\OrderController; // ✅ Add OrderController
+use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
@@ -20,12 +20,14 @@ Route::get('categories/{id}', [CategoryController::class, 'show']);
 Route::get('/collections', [CollectionController::class, 'index']);
 Route::get('/collections/{slug}', [CollectionController::class, 'show']);
 
-// ✅ Payment routes (PUBLIC - SSLCommerz callbacks need no auth)
+// Payment routes (PUBLIC - SSLCommerz callbacks need no auth)
 Route::post('/payment/init', [PaymentController::class, 'initPayment']);
-Route::post('/payment/success', [PaymentController::class, 'success']);
-Route::post('/payment/fail', [PaymentController::class, 'fail']);
-Route::post('/payment/cancel', [PaymentController::class, 'cancel']);
-Route::post('/payment/ipn', [PaymentController::class, 'ipn']); // ✅ Added IPN route
+Route::match(['GET', 'POST'], '/payment/success', [PaymentController::class, 'success']);
+Route::match(['GET', 'POST'], '/payment/fail', [PaymentController::class, 'fail']);
+Route::match(['GET', 'POST'], '/payment/cancel', [PaymentController::class, 'cancel']);
+Route::post('/payment/ipn', [PaymentController::class, 'ipn']);
+// Payment test route (for debugging)
+Route::get('/payment/test/{transactionId}', [PaymentController::class, 'testPayment']);
 
 // Private route (requires token)
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -53,11 +55,15 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/wishlist', [WishlistController::class, 'store']);
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy']);
 
-    // ✅ Order management api
+    // User Orders
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::post('/orders', [OrderController::class, 'store']); // Place order
+    Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
-    Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']); // Update order status
+    Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+
+    // Admin Orders
+    Route::get('/admin/orders', [OrderController::class, 'getAllOrders']);
+    Route::get('/admin/orders/{id}', [OrderController::class, 'getOrderDetails']);
 
     // Collection api
     Route::post('/collections', [CollectionController::class, 'store']);
