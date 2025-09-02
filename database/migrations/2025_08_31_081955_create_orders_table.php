@@ -6,12 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('order_number')->unique();
+            $table->string('transaction_id')->nullable(); // Added for payment gateway
             $table->enum('status', ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'])
                 ->default('pending');
             $table->decimal('subtotal', 10, 2);
@@ -26,13 +30,18 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->string('payment_id')->nullable(); // For payment gateway reference
             $table->timestamps();
-
+            
+            // Indexes for better performance
             $table->index(['user_id', 'status']);
             $table->index('order_number');
+            $table->index('transaction_id');
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::dropIfExists('orders');
     }
