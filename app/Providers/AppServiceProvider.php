@@ -9,15 +9,20 @@ class AppServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        // Cloudinary manual configuration
-        $cloudinary = new Cloudinary([
-            'cloud' => [
-                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-                'api_key' => env('CLOUDINARY_API_KEY'),
-                'api_secret' => env('CLOUDINARY_API_SECRET'),
-            ],
-        ]);
+        // Cloudinary manual configuration with null check
+        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = env('CLOUDINARY_API_KEY');
+        $apiSecret = env('CLOUDINARY_API_SECRET');
 
-        $this->app->instance(Cloudinary::class, $cloudinary);
+        if ($cloudName && $apiKey && $apiSecret) {
+            $cloudinary = new Cloudinary([
+                'cloud' => [
+                    'cloud_name' => $cloudName,
+                    'api_key' => $apiKey,
+                    'api_secret' => $apiSecret,
+                ],
+            ]);
+            $this->app->instance(Cloudinary::class, $cloudinary);
+        }
     }
 }
