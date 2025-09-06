@@ -101,14 +101,14 @@ class PaymentController extends Controller
         
         if (!$tran_id || !$val_id) {
             Log::error('Missing tran_id or val_id');
-            return redirect('http://localhost:5173/cart?status=error&message=Invalid payment response');
+            return redirect('https://laravel-first-app-user-frontend.vercel.app/cart?status=error&message=Invalid payment response');
         }
         
         $order = Order::where('transaction_id', $tran_id)->first();
         
         if (!$order) {
             Log::error('Order not found for transaction:', ['tran_id' => $tran_id]);
-            return redirect('http://localhost:5173/cart?status=error&message=Order not found');
+            return redirect('https://laravel-first-app-user-frontend.vercel.app/cart?status=error&message=Order not found');
         }
 
         Log::info('Order found:', ['order_id' => $order->id, 'current_status' => $order->payment_status]);
@@ -124,11 +124,11 @@ class PaymentController extends Controller
             
             Log::info('Order updated successfully:', ['order_id' => $order->id, 'new_status' => 'paid']);
             
-            return redirect("http://localhost:5173/order-success/{$order->id}?status=success");
+            return redirect("https://laravel-first-app-user-frontend.vercel.app/order-success/{$order->id}?status=success");
         }
         
         Log::error('Payment status not valid', ['ssl_status' => $sslStatus, 'tran_id' => $tran_id]);
-        return redirect('http://localhost:5173/cart?status=failed&message=Payment validation failed');
+        return redirect('https://laravel-first-app-user-frontend.vercel.app/cart?status=failed&message=Payment validation failed');
     }
 
     public function fail(Request $request)
@@ -143,7 +143,7 @@ class PaymentController extends Controller
             }
         }
 
-        return redirect('http://localhost:5173/cart?status=failed');
+        return redirect('https://laravel-first-app-user-frontend.vercel.app/cart?status=failed');
     }
 
     public function cancel(Request $request)
@@ -158,7 +158,7 @@ class PaymentController extends Controller
             }
         }
 
-        return redirect('http://localhost:5173/cart?status=cancelled');
+        return redirect('https://laravel-first-app-user-frontend.vercel.app/cart?status=cancelled');
     }
 
     public function ipn(Request $request)
