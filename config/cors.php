@@ -7,7 +7,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://zaw-collection-laravel-api-admin-fr.vercel.app',
+        'https://zaw-collection-laravel-api-admin-fr.vercel.app','https://laravel-first-app-user-frontend.vercel.app',
         'http://localhost:5173','http://localhost:5174'
     ],
 
